@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Sample SAM Template for Powertools Logger benchmarks
+
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+
+Resources:
+  CurrentLogger:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/
+      Handler: current.lambdaHandler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      Tracing: Active
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: current-logger
+          POWERTOOLS_METRICS_NAMESPACE: current-logger
+          LOG_LEVEL: INFO
+      Events:
+        RestAPI:
+          Type: Api
+          Properties:
+            Path: /current
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: "cjs"
+        Minify: false
+        Target: "es2020"
+        OutExtension:
+          - .js=.cjs
+        EntryPoints:
+          - current.ts
+
+  CJSLogger:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/
+      Handler: next-cjs.lambdaHandler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      Tracing: Active
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: next-logger-cjs
+          POWERTOOLS_METRICS_NAMESPACE: next-logger-cjs
+          LOG_LEVEL: INFO
+      Events:
+        RestAPI:
+          Type: Api
+          Properties:
+            Path: /next-cjs
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: "cjs"
+        Minify: false
+        Target: "es2020"
+        OutExtension:
+          - .js=.cjs
+        EntryPoints:
+          - next-cjs.cts
+
+  ESMLogger:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/
+      Handler: next-esm.lambdaHandler
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: next-logger-esm
+          POWERTOOLS_METRICS_NAMESPACE: next-logger-esm
+          LOG_LEVEL: INFO
+      Events:
+        RestAPI:
+          Type: Api
+          Properties:
+            Path: /next-esm
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: "esm"
+        Minify: false
+        Target: "es2020"
+        OutExtension:
+          - .js=.mjs
+        EntryPoints:
+          - next-esm.mts
+
+Outputs:
+  EndpointURL:
+    Description: "API Gateway URL to paste into artillery config.yaml:"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  CurrentLogger:
+    Description: "Logger@next CommonJS module function API URL:"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/current/"
+  NextLoggerCJS:
+    Description: "Logger@next CommonJS module function API URL:"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/next-cjs/"
+  NextLoggerESM:
+    Description: "Logger@next ES module function API URL:"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/next-esm/"
