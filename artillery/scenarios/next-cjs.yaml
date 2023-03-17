@@ -1,0 +1,5 @@
+scenarios:
+  - name: "Testing Logger-next CJS"
+    flow:
+      - get:
+          url: "/next-cjs"

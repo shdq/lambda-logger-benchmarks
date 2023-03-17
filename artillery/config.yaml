@@ -1,0 +1,6 @@
+config:
+  target: "PASTE_API_GATEWAY_HERE"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: 10 requests per second for 60 seconds

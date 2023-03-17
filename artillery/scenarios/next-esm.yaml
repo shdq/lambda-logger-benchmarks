@@ -1,0 +1,5 @@
+scenarios:
+  - name: "Testing Logger-next ESM"
+    flow:
+      - get:
+          url: "/next-esm"

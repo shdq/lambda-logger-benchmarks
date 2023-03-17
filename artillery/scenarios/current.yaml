@@ -1,0 +1,5 @@
+scenarios:
+  - name: "Testing current Logger"
+    flow:
+      - get:
+          url: "/current"
