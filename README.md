@@ -24,6 +24,15 @@ During build functions bundle dependencies in one file. It is not minified, so c
 sam validate --lint
 ```
 
+### Adjust AWS SAM Template
+
+You can adjust template, e.g. target platform: `nodejs14.x`, `nodejs16.x`, or `nodejs18.x`.
+
+```yml
+Properties:
+  Runtime: nodejs16.x
+```
+
 ### Build functions from AWS SAM Template
 
 ```bash
@@ -78,11 +87,13 @@ Docs: https://www.artillery.io/docs/guides/getting-started/writing-your-first-te
 
 # Results
 
+## Node 18
+
 This is results with current tests setup: 10 requests per second for 60 seconds.
 
 Same query was used to get results of the measurements: https://aws.amazon.com/blogs/compute/optimizing-node-js-dependencies-in-aws-lambda/
 
-**CloudWatch Logs Insights**
+**Export from CloudWatch Logs Insights:**
 
 <details>
   <summary>Current logger</summary>
@@ -118,6 +129,66 @@ Same query was used to get results of the measurements: https://aws.amazon.com/b
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | logger | 0 | 597 | 1.23 | 1.4188 | 1.5385 | 1.6883 | 5.2866 | 19.1734 | 90.8079 | 176.06 |
 | logger | 1 | 3 | 251.43 | 251.43 | 267.84 | 291 | 291 | 291 | 291 | 291 |
+---
+
+</details>
+
+## Node 16
+
+With with increasing and sustained load:
+
+```
+phases:
+  - duration: 60
+    arrivalRate: 5
+    name: Warm up
+  - duration: 120
+    arrivalRate: 5
+    rampTo: 50
+    name: Ramp up load
+  - duration: 300
+    arrivalRate: 50
+    name: Sustained load
+```
+
+<img width="100%" alt="Logger ES module benchmarks" src="https://user-images.githubusercontent.com/1219618/226328459-f58a27f7-b3be-4d9d-9ae7-ee2d9a8bdefd.png">
+
+
+**Export from CloudWatch Logs Insights:**
+
+<details>
+  <summary>Current Logger</summary>
+
+---
+| function | coldstart | invocations | p0 | p25 | p50 | p75 | p90 | p95 | p99 | p100 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2023 | 0 | 18593 | 0.99 | 1.352 | 1.4637 | 1.6885 | 6.1078 | 10.1504 | 25.0855 | 178.09 |
+| 2023 | 1 | 7 | 211.4 | 213.88 | 219.6 | 232.93 | 380.44 | 380.44 | 380.44 | 380.44 |
+---
+
+</details>
+
+
+<details>
+  <summary>Logger CJS built</summary>
+
+---
+| function | coldstart | invocations | p0 | p25 | p50 | p75 | p90 | p95 | p99 | p100 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2023 | 0 | 18592 | 1.06 | 1.3956 | 1.4637 | 1.6619 | 3.8545 | 9.0829 | 28.9378 | 182.11 |
+| 2023 | 1 | 8 | 212.15 | 235.62 | 242.67 | 365.99 | 380.45 | 380.45 | 380.45 | 380.45 |
+---
+
+</details>
+
+<details>
+  <summary>Logger ESM built</summary>
+
+---
+| function | coldstart | invocations | p0 | p25 | p50 | p75 | p90 | p95 | p99 | p100 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2023 | 0 | 18592 | 0.98 | 1.3307 | 1.418 | 1.5596 | 3.6752 | 8.3899 | 24.3016 | 153.28 |
+| 2023 | 1 | 8 | 215.67 | 222.84 | 232.06 | 345.54 | 358.62 | 358.62 | 358.62 | 358.62 |
 ---
 
 </details>
